@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApplication_Backend.Models;
+using Backend_1.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace WebApplication_Backend.Controllers
+namespace Backend_1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

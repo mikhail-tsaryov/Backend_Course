@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApplication_Backend.Models
+namespace Backend_1.Models
 {
     /// <summary>
     ///     Person model
