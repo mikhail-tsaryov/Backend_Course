@@ -59,9 +59,7 @@ namespace WebApplication_Backend.Controllers
         [HttpGet("{authorName}")]
         public IEnumerable<BookModel> GetBooksByAuthor(string authorName)
         {
-
-
-            List<BookModel> result = new List<BookModel>();
+            List<BookModel> result = new();
             foreach (BookModel item in _books)
             {
                 if (item.AuthorName == authorName)
@@ -74,26 +72,18 @@ namespace WebApplication_Backend.Controllers
 
         // POST api/<BookController>
         [HttpPost]
-        public IEnumerable<BookModel> Post([FromBody] BookModel model)
+        public IEnumerable<BookModel> PostBook([FromBody] BookModel model)
         {
             _books.Add(model);
             return _books;
         }
 
-        /*
-        // PUT api/<BookController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] BookModel model)
-        {
-            _books[id] = model;
-        }
-        */
-
         // DELETE api/<PersonController>/RemoveTask/Author/Title
         [HttpDelete("{author}/{title}")]
-        public void DeletePerson(string author, string title)
+        public OkResult DeleteBook(string author, string title)
         {
             _books.RemoveAll(_books => (_books.AuthorName == author) & (_books.Title == title));
+            return Ok();
         }
     }
 }

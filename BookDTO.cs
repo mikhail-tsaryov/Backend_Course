@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebApplication_Backend
 {
-    public class Book
+    public class BookDTO
     {
         public string Title { get; set; }
 

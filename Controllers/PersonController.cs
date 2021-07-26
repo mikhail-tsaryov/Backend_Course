@@ -65,7 +65,7 @@ namespace WebApplication_Backend.Controllers
 
         // GET api/<PersonController>/PersonName
         [HttpGet("{personName}")]
-        public IEnumerable<PersonModel> GetBooksByAuthor(string personName)
+        public IEnumerable<PersonModel> GetPersonByName(string personName)
         {
             List<PersonModel> result = new List<PersonModel>();
             foreach (PersonModel item in _persons)
@@ -86,20 +86,12 @@ namespace WebApplication_Backend.Controllers
             GetAllPersons();
         }
 
-        /*
-        // PUT api/<PersonController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] PersonModel model)
-        {
-            _persons[id] = model;
-        }
-        */
-
-        // DELETE api/<PersonController>/RemoveTask/Surname/Name/MiddleName
-        [HttpDelete("{surname}/{name}/{middleName}")]
-        public void DeletePerson(string surname, string name, string middleName)
+        // DELETE api/<PersonController>/Remove/Surname/Name/MiddleName
+        [HttpDelete("Remove/{surname}/{name}/{middleName}")]
+        public OkResult DeletePerson(string surname, string name, string middleName)
         {
             _persons.RemoveAll(_persons => (_persons.Surname == surname) & (_persons.Name == name) & (_persons.MiddleName == middleName));
+            return Ok();
         }
     }
 }
