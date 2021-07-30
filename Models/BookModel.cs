@@ -8,6 +8,8 @@ namespace Backend_1.Models
 {
     public class BookModel
     {
+        [Key]
+        public int BookId { get; set; }
         [Required]
         public string Title { get; set; }
 

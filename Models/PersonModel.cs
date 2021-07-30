@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Backend_1.Models
 {
-    /// <summary>
-    ///     Person model
-    /// </summary>
     public class PersonModel
     {
+        [Key]
+        public int PersonId { get; set; }
         [Required]
         public string Name { get; set; }
 

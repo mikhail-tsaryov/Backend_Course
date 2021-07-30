@@ -3,87 +3,79 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net;
 using Backend_1.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Backend_1.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class BookController : ControllerBase
     {
-
-        private static List<BookModel> _books = new List<BookModel>()
-        {
-            new BookModel()
-            {
-                Title = "Дом минималиста. Комната за комнатой, путь от хаоса к осмысленной жизни",
-                AuthorName = "Беккер",
-                Genre = "Саморазвитие"
-            },
-            new BookModel()
-            {
-                Title = "Тревожные люди",
-                AuthorName = "Бакман",
-                Genre = "Остросюжетная проза"
-            },
-            new BookModel()
-            {
-                Title = "Предел",
-                AuthorName = "Лукьяненко",
-                Genre = "Космическая фантастика"
-            },
-            new BookModel()
-            {
-                Title = "Звезд не хватит на всех. Коллапс Буферной Зоны",
-                AuthorName = "Глебов",
-                Genre = "Космическая фантастика"
-            },
-            new BookModel()
-            {
-                Title = "Выбор. О свободе и внутренней силе человека",
-                AuthorName = "Эгер",
-                Genre = "Биографии и мемуары"
-            }
-        };
-
         // GET: api/<BookController>
         [HttpGet]
         public IEnumerable<BookModel> GetAllBooks()
         {
-            return _books;
+            using (var dbContext = new ApplicationContext())
+            {
+                var allBooks = dbContext.Books.ToList();
+                return allBooks;
+            }   
         }
 
         // GET api/<BookController>/AuthorName
         [HttpGet("{authorName}")]
         public IEnumerable<BookModel> GetBooksByAuthor(string authorName)
         {
-            List<BookModel> result = new();
-            foreach (BookModel item in _books)
+            using (var dbContext = new ApplicationContext())
             {
-                if (item.AuthorName == authorName)
-                {
-                    result.Add(item);
-                }
+                var book = dbContext.Books
+                    .Where(b => b.AuthorName == authorName)
+                    .ToList();
+                return book;
             }
-            return result;
         }
 
         // POST api/<BookController>
         [HttpPost]
-        public IEnumerable<BookModel> PostBook([FromBody] BookModel model)
+        public IEnumerable<BookModel> PostBook(string author, string title, string genre)
         {
-            _books.Add(model);
-            return _books;
+            BookModel newBook = new BookModel()
+            {
+                Title = title,
+                AuthorName = author,
+                Genre = genre
+            };
+            using (var dbContext = new ApplicationContext())
+            {
+                var persons = dbContext.Books.Add(newBook);
+                dbContext.SaveChanges();
+                var allBooks = dbContext.Books.ToList();
+                return allBooks;
+            }
         }
 
-        // DELETE api/<PersonController>/RemoveTask/Author/Title
+        // DELETE api/<PersonController>/Author/Title
         [HttpDelete("{author}/{title}")]
-        public OkResult DeleteBook(string author, string title)
+        public IActionResult DeleteBook(string author, string title)
         {
-            _books.RemoveAll(_books => (_books.AuthorName == author) & (_books.Title == title));
-            return Ok();
+            try
+            {
+                using (var dbContext = new ApplicationContext())
+                {
+                    var book = dbContext.Books
+                        .Where(b => (b.AuthorName == author) & (b.Title == title)).First();
+                    dbContext.Remove(book);
+                    dbContext.SaveChanges();
+                }
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return Ok("Book not found");
+                throw;
+            }            
         }
     }
 }

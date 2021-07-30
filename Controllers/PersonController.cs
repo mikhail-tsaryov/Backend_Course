@@ -5,93 +5,77 @@ using System.Linq;
 using System.Threading.Tasks;
 using Backend_1.Models;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Backend_1.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class PersonController : ControllerBase
     {
-        private static List<PersonModel> _persons = new List<PersonModel>()
-        {
-            new PersonModel()
-            {
-                Surname = "Горбунов",
-                Name = "Николай",
-                MiddleName = "Дмитриевич",
-                DateOfBirthday = new DateTime(1964, 5, 12)
-            },
-
-            new PersonModel()
-            {
-                Surname = "Соловьёв",
-                Name = "Вениамин",
-                MiddleName = "Григорьевич",
-                DateOfBirthday = new DateTime(1986, 1, 1)
-            },
-
-            new PersonModel()
-            {
-                Surname = "Лихачёв",
-                Name = "Орест",
-                MiddleName = "Кимович",
-                DateOfBirthday = new DateTime(2000, 10, 30)
-            },
-
-            new PersonModel()
-            {
-                Surname = "Зуев",
-                Name = "Митрофан",
-                MiddleName = "Аркадьевич",
-                DateOfBirthday = new DateTime(1939, 6, 18)
-            },
-
-            new PersonModel()
-            {
-                Surname = "Назаров",
-                Name = "Елисей",
-                MiddleName = "Наумович",
-                DateOfBirthday = new DateTime(1997, 12, 6)
-            }
-        };
-
         // GET: api/<PersonController>
         [HttpGet]
         public IEnumerable<PersonModel> GetAllPersons()
         {
-            return _persons;
+            using (var dbContext = new ApplicationContext())
+            {
+                var allPersons = dbContext.Persons.ToList();
+                return allPersons;
+            }
         }
 
         // GET api/<PersonController>/PersonName
         [HttpGet("{personName}")]
         public IEnumerable<PersonModel> GetPersonByName(string personName)
         {
-            List<PersonModel> result = new List<PersonModel>();
-            foreach (PersonModel item in _persons)
+            using (var dbContext = new ApplicationContext())
             {
-                if (item.Name == personName)
-                {
-                    result.Add(item);
-                }
+                var persons = dbContext.Persons
+                    .Where(p => p.Name == personName)
+                    .ToList();
+                return persons;
             }
-            return result;
         }
 
         // POST api/<PersonController>
         [HttpPost]
-        public void Post([FromBody] PersonModel model)
+        public IEnumerable<PersonModel> Post(string surname, string name, string middleName, DateTime birthDate)
         {
-            _persons.Add(model);
-            GetAllPersons();
+            PersonModel newPerson = new PersonModel()
+            {
+                Surname = surname,
+                Name = name,
+                MiddleName = middleName,
+                DateOfBirthday = birthDate
+            };
+            using (var dbContext = new ApplicationContext())
+            {
+                var persons = dbContext.Persons.Add(newPerson);
+                dbContext.SaveChanges();
+                var allPersons = dbContext.Persons.ToList();
+                return allPersons;
+            }
         }
 
         // DELETE api/<PersonController>/Remove/Surname/Name/MiddleName
-        [HttpDelete("Remove/{surname}/{name}/{middleName}")]
-        public OkResult DeletePerson(string surname, string name, string middleName)
+        [HttpDelete("{surname}/{name}/{middleName}")]
+        public IActionResult DeletePerson(string surname, string name, string middleName)
         {
-            _persons.RemoveAll(_persons => (_persons.Surname == surname) & (_persons.Name == name) & (_persons.MiddleName == middleName));
-            return Ok();
+            try
+            {
+                using (var dbContext = new ApplicationContext())
+                {
+                    var person = dbContext.Persons
+                        .Where(p => (p.Surname == surname) & (p.Name == name) & (p.MiddleName == middleName)).First();
+
+                    dbContext.Remove(person);
+                    dbContext.SaveChanges();
+                }
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return Ok("Person not found"); ;
+                throw;
+            }
         }
     }
 }
